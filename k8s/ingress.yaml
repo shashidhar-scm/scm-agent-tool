@@ -1,0 +1,17 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: scm-tool-gateway
+  namespace: backend
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`tool-gateway.citypost.us`)
+      kind: Rule
+      services:
+        - name: scm-tool-gateway
+          port: 80
+  tls:
+    secretName: traefik-cert

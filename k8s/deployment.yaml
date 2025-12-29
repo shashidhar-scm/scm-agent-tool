@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scm-tool-gateway
+  namespace: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scm-tool-gateway
+  template:
+    metadata:
+      labels:
+        app: scm-tool-gateway
+    spec:
+      imagePullSecrets:
+        - name: scm-registrypullsecret
+      containers:
+        - name: scm-tool-gateway
+          image: smartcitymedia/scm-tool-gateway-http:0.0.28
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 7070
+          env:
+            - name: PORT
+              value: "7070"
+            - name: CONTEXT_STORE_PATH
+              value: "/data/context-store.json"
+            - name: RATE_LIMIT_WINDOW_SECONDS
+              value: "60"
+            - name: RATE_LIMIT_MAX
+              value: "120"
+            - name: ADS_ALLOWLIST
+              value: "/api/v1/advertisers/*,/api/v1/campaigns/*,/api/v1/creatives/*,/api/v1/health*,/api/v1/projects*,/api/v1/devices*,/api/v1/venues*"
+            - name: METRICS_ALLOWLIST
+              value: "*"
+            - name: POP_ALLOWLIST
+              value: "/pop,/pop/search,/pop/stats,/pop/trend"
+            - name: PUBLIC_BASE_URL
+              value: "https://tool-gateway.citypost.us"
+            - name: SCM_ADS_API_BASE_URL
+              value: "https://scm-ads-api.citypost.us"
+            - name: SCM_METRICS_API_BASE_URL
+              value: "https://scm-metrics-api.citypost.us"
+            - name: SCM_POP_API_BASE_URL
+              value: "https://pop-api.citypost.us"
+          volumeMounts:
+            - name: context-store
+              mountPath: /data
+          envFrom:
+            - secretRef:
+                name: scm-tool-gateway-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 7070
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 7070
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+      volumes:
+        - name: context-store
+          persistentVolumeClaim:
+            claimName: scm-tool-gateway-context-pvc
