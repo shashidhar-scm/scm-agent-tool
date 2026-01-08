@@ -19,6 +19,25 @@ export function createProtectedRouter({ config, adsAuth, contextStore }) {
     }
   });
 
+  router.get("/ads/campaigns/:id/impressions", async (req, res) => {
+    try {
+      await adsAuth.ensureLoggedIn(false);
+      const id = req.params.id;
+      const proxyPath = `/api/v1/campaigns/${id}/impressions`;
+      if (!matchAllowlist(proxyPath, config.adsAllowlist)) {
+        res.status(403).json({ error: "forbidden_path" });
+        return;
+      }
+      await proxyGet(req, res, {
+        baseUrl: config.adsBaseUrl,
+        proxyPath,
+        headers: { Authorization: `Bearer ${adsAuth.getToken()}` },
+      });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
   router.put("/context/:key", express.json({ limit: "1mb" }), async (req, res) => {
     try {
       const key = req.params.key || "";
@@ -783,6 +802,19 @@ export function createProtectedRouter({ config, adsAuth, contextStore }) {
   router.get("/pop/stats", async (req, res) => {
     try {
       const proxyPath = "/pop/stats";
+      if (!matchAllowlist(proxyPath, config.popAllowlist)) {
+        res.status(403).json({ error: "forbidden_path" });
+        return;
+      }
+      await proxyGet(req, res, { baseUrl: config.popBaseUrl, proxyPath });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  router.get("/pop/impressions", async (req, res) => {
+    try {
+      const proxyPath = "/pop/impressions";
       if (!matchAllowlist(proxyPath, config.popAllowlist)) {
         res.status(403).json({ error: "forbidden_path" });
         return;

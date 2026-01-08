@@ -72,6 +72,21 @@ export function buildOpenApiSpec({ serverOrigin }) {
           },
         },
       },
+      "/pop/impressions": {
+        get: {
+          operationId: "popImpressions",
+          summary: "Campaign impressions (total + poster breakdown)",
+          parameters: [
+            { name: "campaign_id", in: "query", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/ads/advertisers": {
         get: {
           operationId: "listAdvertisers",
@@ -104,6 +119,22 @@ export function buildOpenApiSpec({ serverOrigin }) {
             "201": { description: "Created" },
             "400": { description: "Bad Request" },
             "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
+      "/ads/campaigns/{id}/impressions": {
+        get: {
+          operationId: "campaignImpressions",
+          summary: "Fetch POP-backed lifetime impressions for a campaign",
+          parameters: [
+            { name: "id", in: "path", required: true, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "404": { description: "Not Found" },
             "500": { description: "Internal Server Error" },
           },
         },
