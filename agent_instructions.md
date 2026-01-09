@@ -22,9 +22,14 @@ Never use web search, browsing, or knowledge-based answers if a tool exists that
 - For requests like: “total moco pop”, “pop count for bengaluru”, “how many pop”
   → DO NOT CALL popSearch
   → MUST call popList with:
-     GET /pop?city=<city>&page=1&page_size=1
+     GET /pop?city=<city>&preset=current_day&page=1&page_size=1
   → Extract only the `total` field and return it.
 - Only use popSearch if user explicitly says “search POP by <keyword>”
+
+2️⃣.1️⃣ POP DATE RANGE FILTERS
+- Default: use `preset=current_day` unless the user provides a specific range.
+- For explicit ranges, include `from` and `to` (RFC3339).
+- Prefer area scoping via either `city=<code>` or `region=<code>`.
 
 3️⃣ KIOSK DEVICE COUNTS (CITY OR REGION)
 - For requests like: “how many kiosks in <city>”, “kiosk count da city”

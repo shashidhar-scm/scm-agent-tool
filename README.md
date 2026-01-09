@@ -29,6 +29,7 @@ Optional env:
 - `PORT` (default: `7070`)
 - `SCM_ADS_API_BASE_URL` (default: `http://localhost:9000`)
 - `SCM_METRICS_API_BASE_URL` (default: `http://localhost:8080`)
+- `SCM_POP_API_BASE_URL` (default: `https://pop-api.citypost.us`)
 
 Run:
 
@@ -88,6 +89,26 @@ Set `PUBLIC_BASE_URL` (e.g. `https://tool-gateway.citypost.us`) so `GET /openapi
 - `GET /openapi.json` (public)
 - `GET /ads/*` -> proxies to `SCM_ADS_API_BASE_URL/*` with cached Ads JWT
 - `GET /metrics/*` -> proxies to `SCM_METRICS_API_BASE_URL/*`
+- `GET /pop/*` -> proxies to `SCM_POP_API_BASE_URL/*`
+
+### POP datetime filtering
+
+POP endpoints support time filtering via query params:
+
+- `preset=current_day` (default)
+- or explicit `from` / `to` in RFC3339
+
+Examples:
+
+```bash
+curl -H "X-API-Key: $TOOL_GATEWAY_API_KEY" \
+  "http://localhost:7070/pop/stats?group_by=poster&metric=clicks&preset=current_day&city=kcmo"
+```
+
+```bash
+curl -H "X-API-Key: $TOOL_GATEWAY_API_KEY" \
+  "http://localhost:7070/pop/stats?group_by=device&metric=plays&from=2026-01-07T00:00:00Z&to=2026-01-08T00:00:00Z&region=brt"
+```
 
 ### Examples
 

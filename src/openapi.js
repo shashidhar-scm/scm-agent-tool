@@ -24,12 +24,6 @@ export function buildOpenApiSpec({ serverOrigin }) {
     },
     security: [{ ApiKeyAuth: [] }],
     paths: {
-      "/health": {
-        get: {
-          operationId: "health",
-          responses: { "200": { description: "OK" } },
-        },
-      },
       "/context/{key}": {
         get: {
           operationId: "getContext",
@@ -64,6 +58,25 @@ export function buildOpenApiSpec({ serverOrigin }) {
               },
             },
           },
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
+      "/ads/devices/search": {
+        get: {
+          operationId: "searchDevices",
+          summary: "Search devices",
+          parameters: [
+            { name: "query", in: "query", required: true, schema: { type: "string" } },
+            { name: "city", in: "query", required: false, schema: { type: "string" } },
+            { name: "region", in: "query", required: false, schema: { type: "string" } },
+            { name: "page", in: "query", required: false, schema: { type: "integer" } },
+            { name: "page_size", in: "query", required: false, schema: { type: "integer" } },
+          ],
           responses: {
             "200": { description: "OK" },
             "400": { description: "Bad Request" },
@@ -139,6 +152,23 @@ export function buildOpenApiSpec({ serverOrigin }) {
           },
         },
       },
+      "/ads/campaigns/search": {
+        get: {
+          operationId: "searchCampaigns",
+          summary: "Search campaigns",
+          parameters: [
+            { name: "query", in: "query", required: true, schema: { type: "string" } },
+            { name: "page", in: "query", required: false, schema: { type: "integer" } },
+            { name: "page_size", in: "query", required: false, schema: { type: "integer" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/ads/campaigns": {
         get: {
           operationId: "listCampaigns",
@@ -208,6 +238,23 @@ export function buildOpenApiSpec({ serverOrigin }) {
           },
         },
       },
+      "/ads/projects/search": {
+        get: {
+          operationId: "searchProjects",
+          summary: "Search projects",
+          parameters: [
+            { name: "query", in: "query", required: true, schema: { type: "string" } },
+            { name: "page", in: "query", required: false, schema: { type: "integer" } },
+            { name: "page_size", in: "query", required: false, schema: { type: "integer" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/ads/devices": {
         get: {
           operationId: "listDevices",
@@ -254,20 +301,6 @@ export function buildOpenApiSpec({ serverOrigin }) {
             "200": { description: "OK" },
             "400": { description: "Bad Request" },
             "401": { description: "Unauthorized" },
-            "500": { description: "Internal Server Error" },
-          },
-        },
-      },
-      "/ads/venues/{id}": {
-        get: {
-          operationId: "getVenue",
-          summary: "Get venue by id",
-          parameters: [{ name: "id", in: "path", required: true, schema: { type: "integer" } }],
-          responses: {
-            "200": { description: "OK" },
-            "400": { description: "Bad Request" },
-            "401": { description: "Unauthorized" },
-            "404": { description: "Not Found" },
             "500": { description: "Internal Server Error" },
           },
         },
@@ -409,6 +442,23 @@ export function buildOpenApiSpec({ serverOrigin }) {
           responses: { "200": { description: "OK" } },
         },
       },
+      "/ads/creatives/search": {
+        get: {
+          operationId: "searchCreatives",
+          summary: "Search creatives",
+          parameters: [
+            { name: "query", in: "query", required: true, schema: { type: "string" } },
+            { name: "page", in: "query", required: false, schema: { type: "integer" } },
+            { name: "page_size", in: "query", required: false, schema: { type: "integer" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/ads/creatives/campaign/{campaignId}": {
         get: {
           operationId: "listCreativesByCampaign",
@@ -431,6 +481,7 @@ export function buildOpenApiSpec({ serverOrigin }) {
 			summary: "Region-wise device counts (grouped by city + region)",
 			parameters: [
 				{ name: "city", in: "query", required: false, schema: { type: "string" } },
+				{ name: "region", in: "query", required: false, schema: { type: "string" } },
 			],
 			responses: {
 				"200": { description: "OK" },
@@ -440,6 +491,20 @@ export function buildOpenApiSpec({ serverOrigin }) {
 			},
 		},
 	  },
+      "/metrics/servers/status/city": {
+        get: {
+          operationId: "metricsServersStatusCity",
+          summary: "Server status grouped by city",
+          parameters: [
+            { name: "city", in: "query", required: false, schema: { type: "string" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "401": { description: "Unauthorized" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/metrics/latest": {
         get: {
           operationId: "metricsLatest",
@@ -461,6 +526,10 @@ export function buildOpenApiSpec({ serverOrigin }) {
           parameters: [
             { name: "city", in: "query", required: false, schema: { type: "string" } },
             { name: "region", in: "query", required: false, schema: { type: "string" } },
+            { name: "preset", in: "query", required: false, schema: { type: "string", enum: ["current_day"], default: "current_day" } },
+            { name: "range", in: "query", required: false, schema: { type: "string", enum: ["current_day"] } },
+            { name: "from", in: "query", required: false, schema: { type: "string", format: "date-time" } },
+            { name: "to", in: "query", required: false, schema: { type: "string", format: "date-time" } },
             { name: "kiosk_name", in: "query", required: false, schema: { type: "string" } },
             { name: "host_name", in: "query", required: false, schema: { type: "string" } },
             { name: "poster_type", in: "query", required: false, schema: { type: "string" } },
@@ -474,26 +543,6 @@ export function buildOpenApiSpec({ serverOrigin }) {
           responses: { "200": { description: "OK" } },
         },
       },
-      "/pop/search": {
-        get: {
-          operationId: "popSearch",
-          summary: "Search POP records",
-          parameters: [
-            {
-              name: "q",
-              in: "query",
-              required: true,
-              schema: { type: "string" },
-            },
-          ],
-          responses: {
-            "200": { description: "OK" },
-            "400": { description: "Bad Request" },
-            "401": { description: "Unauthorized" },
-            "500": { description: "Internal Server Error" },
-          },
-        },
-      },
       "/pop/stats": {
         get: {
           operationId: "popStats",
@@ -505,28 +554,8 @@ export function buildOpenApiSpec({ serverOrigin }) {
             { name: "limit", in: "query", required: false, schema: { type: "integer" } },
             { name: "city", in: "query", required: false, schema: { type: "string" } },
             { name: "region", in: "query", required: false, schema: { type: "string" } },
-            { name: "last_days", in: "query", required: false, schema: { type: "integer", default: 30 } },
-            { name: "from", in: "query", required: false, schema: { type: "string", format: "date-time" } },
-            { name: "to", in: "query", required: false, schema: { type: "string", format: "date-time" } },
-          ],
-          responses: {
-            "200": { description: "OK" },
-            "400": { description: "Bad Request" },
-            "401": { description: "Unauthorized" },
-            "500": { description: "Internal Server Error" },
-          },
-        },
-      },
-      "/pop/trend": {
-        get: {
-          operationId: "popTrend",
-          summary: "Trend over time for a poster/device(city) by plays/clicks/count",
-          parameters: [
-            { name: "dimension", in: "query", required: false, schema: { type: "string", enum: ["poster", "device", "city"] } },
-            { name: "key", in: "query", required: true, schema: { type: "string" } },
-            { name: "metric", in: "query", required: false, schema: { type: "string", enum: ["plays", "clicks", "value", "count"] } },
-            { name: "bucket", in: "query", required: false, schema: { type: "string", enum: ["hour", "day", "week", "month"] } },
-            { name: "last_days", in: "query", required: false, schema: { type: "integer", default: 30 } },
+            { name: "preset", in: "query", required: false, schema: { type: "string", enum: ["current_day"], default: "current_day" } },
+            { name: "range", in: "query", required: false, schema: { type: "string", enum: ["current_day"] } },
             { name: "from", in: "query", required: false, schema: { type: "string", format: "date-time" } },
             { name: "to", in: "query", required: false, schema: { type: "string", format: "date-time" } },
           ],

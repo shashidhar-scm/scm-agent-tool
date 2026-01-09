@@ -135,6 +135,34 @@ export function createProtectedRouter({ config, adsAuth, contextStore }) {
     return Buffer.concat(chunks);
   }
 
+  function registerAdsSearchRoute(routePath, proxyPath) {
+    router.get(routePath, async (req, res) => {
+      try {
+        await adsAuth.ensureLoggedIn(false);
+        if (!matchAllowlist(proxyPath, config.adsAllowlist)) {
+          res.status(403).json({ error: "forbidden_path" });
+          return;
+        }
+        await proxyGet(req, res, {
+          baseUrl: config.adsBaseUrl,
+          proxyPath,
+          headers: { Authorization: `Bearer ${adsAuth.getToken()}` },
+        });
+      } catch (err) {
+        res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+      }
+    });
+  }
+
+  [
+    ["/ads/advertisers/search", "/api/v1/advertisers/search"],
+    ["/ads/campaigns/search", "/api/v1/campaigns/search"],
+    ["/ads/creatives/search", "/api/v1/creatives/search"],
+    ["/ads/devices/search", "/api/v1/devices/search"],
+    ["/ads/projects/search", "/api/v1/projects/search"],
+    ["/ads/venues/search", "/api/v1/venues/search"],
+  ].forEach(([routePath, proxyPath]) => registerAdsSearchRoute(routePath, proxyPath));
+
   router.get("/ads/advertisers", async (req, res) => {
     try {
       await adsAuth.ensureLoggedIn(false);
@@ -747,6 +775,45 @@ export function createProtectedRouter({ config, adsAuth, contextStore }) {
     }
   );
 
+  router.get("/metrics/servers", async (req, res) => {
+    try {
+      const proxyPath = "/api/servers";
+      if (!matchAllowlist(proxyPath, config.metricsAllowlist)) {
+        res.status(403).json({ error: "forbidden_path" });
+        return;
+      }
+      await proxyGet(req, res, { baseUrl: config.metricsBaseUrl, proxyPath });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  router.get("/metrics/servers/status", async (req, res) => {
+    try {
+      const proxyPath = "/api/servers/status";
+      if (!matchAllowlist(proxyPath, config.metricsAllowlist)) {
+        res.status(403).json({ error: "forbidden_path" });
+        return;
+      }
+      await proxyGet(req, res, { baseUrl: config.metricsBaseUrl, proxyPath });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
+  router.get("/metrics/servers/status/city", async (req, res) => {
+    try {
+      const proxyPath = "/api/servers/status/city";
+      if (!matchAllowlist(proxyPath, config.metricsAllowlist)) {
+        res.status(403).json({ error: "forbidden_path" });
+        return;
+      }
+      await proxyGet(req, res, { baseUrl: config.metricsBaseUrl, proxyPath });
+    } catch (err) {
+      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+    }
+  });
+
   router.get("/metrics/latest", async (req, res) => {
     try {
       const proxyPath = "/api/metrics/latest";
@@ -776,19 +843,6 @@ export function createProtectedRouter({ config, adsAuth, contextStore }) {
   router.get("/pop", async (req, res) => {
     try {
       const proxyPath = "/pop";
-      if (!matchAllowlist(proxyPath, config.popAllowlist)) {
-        res.status(403).json({ error: "forbidden_path" });
-        return;
-      }
-      await proxyGet(req, res, { baseUrl: config.popBaseUrl, proxyPath });
-    } catch (err) {
-      res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
-    }
-  });
-
-  router.get("/pop/search", async (req, res) => {
-    try {
-      const proxyPath = "/pop/search";
       if (!matchAllowlist(proxyPath, config.popAllowlist)) {
         res.status(403).json({ error: "forbidden_path" });
         return;
