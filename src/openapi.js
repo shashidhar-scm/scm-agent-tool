@@ -255,6 +255,24 @@ export function buildOpenApiSpec({ serverOrigin }) {
           },
         },
       },
+      "/ads/venues/search": {
+        get: {
+          operationId: "searchVenues",
+          summary: "Search venues",
+          parameters: [
+            { name: "query", in: "query", required: true, schema: { type: "string" } },
+            { name: "page", in: "query", required: false, schema: { type: "integer" } },
+            { name: "page_size", in: "query", required: false, schema: { type: "integer" } },
+          ],
+          responses: {
+            "200": { description: "OK" },
+            "400": { description: "Bad Request" },
+            "401": { description: "Unauthorized" },
+            "404": { description: "Not Found" },
+            "500": { description: "Internal Server Error" },
+          },
+        },
+      },
       "/ads/devices": {
         get: {
           operationId: "listDevices",
